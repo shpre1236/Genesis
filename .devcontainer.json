@@ -1,0 +1,61 @@
+{
+  "name": "Diden World DevContainer",
+  "image": "didenworld:1.0.1",
+  "runArgs": [
+    // NVIDIA GPU 활성화 (Docker CLI v19.03+ 필요)
+    "--gpus", "all"
+  ],
+  "containerEnv": {
+    // GUI 출력 활성화를 위해 호스트의 DISPLAY 변수 전달
+    "DISPLAY": "${localEnv:DISPLAY}",
+    
+    // mount 된 workspace 위치를 PYTHONPATH에 추가
+    "PYTHONPATH": "/workspaces/Genesis:${localEnv:PYTHONPATH}"
+
+    // 컨테이너 내부 사용자 ID를 호스트와 일치시키기 위해 ID 전달 (중요)
+    // "LOCAL_USER_ID": "1001"   // genesis:0.3.5 이미지에서 등록한 사용자 ID
+  },
+  "mounts": [
+    // X11 소켓 마운트 (GUI 출력을 위해 필수)
+    {
+      "source": "/tmp/.X11-unix",
+      "target": "/tmp/.X11-unix",
+      "type": "bind"
+    },
+    // DRI (Direct Rendering Infrastructure) 마운트 (하드웨어 가속을 위해 필수)
+    {
+      "source": "/dev/dri",
+      "target": "/dev/dri",
+      "type": "bind"
+    },
+    // SSH 에이전트 소켓 마운트 (SSH 키 사용을 위해 필수)
+    {
+      "source": "${env:SSH_AUTH_SOCK}",
+      "target": "/ssh-agent",
+      "type": "bind"
+    }
+  ],
+  // "remoteUser": "user",    // 편의상 root로 실행
+  "postCreateCommand": "pip install -e '.[dev]'",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        // 예: Python 개발에 유용한 확장
+        "ms-python.python", 
+        // 예: Jupyter 노트북 지원 확장
+        "ms-toolsai.jupyter", 
+        // Black (코드 포맷터)
+        "ms-python.black-formatter", 
+        // isort (import 정렬)
+        "ms-python.isort"
+      ],
+      "settings": {
+        // Python 확장 설정 예시
+        "python.defaultInterpreterPath": "/opt/conda/bin/python",
+        "python.formatting.provider": "black"
+      }
+      // docker login ghcr. io -p ghp_ qlyQZrqWmfoLNafb7jB9M0lFNGlU7Y1UE6EN
+    }
+  }
+}
+
